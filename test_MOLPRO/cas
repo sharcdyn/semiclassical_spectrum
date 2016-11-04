@@ -1,0 +1,37 @@
+file 3 ref.wf
+file 2 cas.wf
+
+nosym
+geom={
+include geom.xyz
+}
+
+{multi
+
+ closed 16
+ occ 21
+
+ wf 38 1 0
+ state 5
+ wf 38 1 2
+ state 5
+}
+put molden cas.molden
+
+{ci
+ noexc
+ wf 38 1 0
+ state 5
+ save 6001.2
+}
+{ci
+ noexc
+ wf 38 1 2
+ state 5
+ save 6002.2
+}
+
+{ci
+ hlsmat amfi 6001.2 6002.2
+ print hls=1
+}

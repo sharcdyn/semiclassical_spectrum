@@ -1,0 +1,13 @@
+8 20    ### 8 atoms and 17 potentials (5 singlets and 5*3 triplets)
+1      ### Starting at GS
+100      ### Final trajectory
+y      ### Correcting the energy due to the anharmonicity
+0 10 1001   ### Spectrum between 0 and 10 eV
+1. 1. 1.    ### No scaling of the dipoles
+0.1         ### Gaussian convolution 0.1 eV
+7.00 7.40 6749      ### Trajectories between 7.00 and 7.40 eV are selected
+
+
+1.9589571204874423 ### Renormalization factor to get probabilities
+
+
