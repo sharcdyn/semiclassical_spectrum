@@ -23,7 +23,7 @@ integer, allocatable ::  noat(:)
 integer noat2,noat3
 
 
-logical ex
+logical ex,res
 integer i,j,k
 
 character*1 kkchar
@@ -68,17 +68,42 @@ read(5,*) gwidth
 gwidth=gwidth/27.211
 write(6,*) gwidth
 
-call random_seed(size=nseed)
-allocate(seed(nseed))
-write(6,*) "Range where the trajectories are gonna be allowed (eV) and seed (zero if you do not want to restrict)"
-read(5,*) Ei,Ef,seed(1)
+write(6,*) "Range where the trajectories are gonna be allowed (eV) and zero if you do not want to restrict (1 otherwise)"
+read(5,*) Ei,Ef,i
 Ei=Ei/27.211
 Ef=Ef/27.211
-write(6,*) Ei,Ef,seed(1)
-if (nseed.ne.1) then
- do i=2,nseed
-  seed(i)=seed(i-1)+1
- enddo
+write(6,*) Ei,Ef,i
+
+if (i.eq.0) then
+ nseed=1
+ allocate(seed(nseed))
+ seed(1)=0
+else
+ inquire(file="seeds.dat",exist=ex)
+ if (ex .eqv. .false.) then
+  open(1,file="seeds.dat")
+  write(6,*) "Generating seeds and storage them in seeds.dat"
+  call random_seed(size=nseed)
+  write(1,*) nseed
+  allocate (seed(nseed))
+  inquire(file="/dev/urandom",exist=res)
+  if (res) then
+   open(2, file='/dev/urandom', access='stream', form='UNFORMATTED')
+   read(2) seed
+   close(2)
+  else
+   call system_clock(count=j)
+   seed = j + 37 * (/ (i - 1, i = 1, nseed) /)
+  endif
+  write(1,*) (seed(i),i=1,nseed)
+  close(1)
+  deallocate(seed)
+ endif
+ open(1,file="seeds.dat")
+ read(1,*) nseed
+ allocate(seed(nseed))
+ read(1,*) (seed(i),i=1,nseed)
+ close(1)
 endif
 
 
@@ -280,7 +305,7 @@ do while(n.lt.ntrajf)
    endif
    write(13,901) ntraj," Traj Old ",n,pot,k,Epot(pot),Epot(k),Ekin,prob(k)
    write(15,*) nat
-   write(15,902) Epot(pot)+Ekin,Ekin,Epot(pot),Epot(k), prob(k)
+   write(15,902) k,Epot(pot)+Ekin,Ekin,Epot(pot),Epot(k), prob(k)
    do i=1,nat
     write(13,903) (geom(i,j),j=1,3)
     write(15,904) sat(i),(geom(i,j)*.5292,j=1,3),(vel(i,j)*1000.,j=1,3)
@@ -329,7 +354,7 @@ enddo
 
 900 format(1000(x,E20.10e3))
 901 format(I6.6,A,I6.6,2(x,I4.4),4(x,E20.10e3) )
-902 format(10(x,E20.10e3))
+902 format(I0,10(x,E20.10e3))
 903 format(3(x,E20.10e3))
 904 format(A2,6(x,E20.10e3))
 905 format(I10.10,100000(x,E20.10e3))
